@@ -55,6 +55,10 @@ jobs:
         if: failure()
         run: |
           docker compose ps --all
+          db_container=$(docker compose ps --all --quiet documentdb)
+          if [ -n "$db_container" ]; then
+            docker inspect --format '{{json .State.Health}}' "$db_container"
+          fi
           docker compose logs --no-color --tail 80
       - name: Clean up
         if: always()

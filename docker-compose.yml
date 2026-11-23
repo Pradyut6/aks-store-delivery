@@ -4,8 +4,9 @@ services:
     restart: always
     command: ["--username", "username", "--password", "password"]
     healthcheck:
-      test: ["CMD-SHELL", "echo | openssl s_client -connect localhost:10260 -brief 2>/dev/null | grep -q CONNECTED"]
-      interval: 30s
+      test: ["CMD-SHELL", "openssl s_client -connect 127.0.0.1:10260 -brief </dev/null 2>&1 | grep -q '^CONNECTION ESTABLISHED'"]
+      start_period: 60s
+      interval: 5s
       timeout: 10s
       retries: 5
     networks:
