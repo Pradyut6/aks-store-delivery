@@ -1,21 +1,5 @@
-# Security Policy
+# Security policy
 
-## Supported Versions
+Report security findings to the repository maintainer through GitHub's private vulnerability reporting when available. Include the affected component and version, the impact, and enough detail to verify the issue. Redact credentials, tokens, and customer data.
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
-
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
-
-## Reporting a Vulnerability
-
-Use this section to tell people how to report a vulnerability.
-
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+The validation workflow blocks detected secrets and reports high and critical dependency findings. The portfolio deployment profile is intended for an isolated demo cluster and contains sample datastore credentials.
