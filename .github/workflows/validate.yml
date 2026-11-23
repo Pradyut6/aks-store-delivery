@@ -1,0 +1,61 @@
+name: Store validation
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  manifests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Verify private service defaults
+        run: |
+          kubectl kustomize kustomize/overlays/portfolio > "$RUNNER_TEMP/store.yaml"
+          ruby scripts/check-services.rb "$RUNNER_TEMP/store.yaml"
+      - name: Scan for committed secrets
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: secret
+          version: v0.69.3
+          hide-progress: true
+          exit-code: "1"
+
+      - name: Report high and critical dependency vulnerabilities
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          hide-progress: true
+          skip-setup-trivy: true
+          exit-code: "0"
+
+  smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Build and start the store
+        run: docker compose up --build --wait --wait-timeout 180
+      - name: Check storefront, admin and catalog proxy
+        run: bash scripts/smoke-test.sh
+      - name: Collect service state and logs
+        if: failure()
+        run: |
+          docker compose ps --all
+          docker compose logs --no-color --tail 80
+      - name: Clean up
+        if: always()
+        run: docker compose down --volumes --remove-orphans
